@@ -10,6 +10,7 @@ import { RedisModule } from '@common/redis/redis.module';
 import { EmailModule } from '@modules/email/email.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { TokenCleanupModule } from '@modules/token-cleanup/token-cleanup.module';
+import { IdentityModule } from './modules/identity/identity.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { TokenCleanupModule } from '@modules/token-cleanup/token-cleanup.module'
     EmailModule,
     RedisModule,
     TokenCleanupModule,
+    IdentityModule,
   ],
   controllers: [AppController],
   providers: [
