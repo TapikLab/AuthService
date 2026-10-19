@@ -10,7 +10,8 @@ import { RedisModule } from '@common/redis/redis.module';
 import { EmailModule } from '@modules/email/email.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { TokenCleanupModule } from '@modules/token-cleanup/token-cleanup.module';
-import { IdentityModule } from './modules/identity/identity.module';
+import { IdentityModule } from '@modules/identity/identity.module';
+import { KeysModule } from '@modules/keys/keys.module';
 
 @Module({
   imports: [
@@ -18,9 +19,9 @@ import { IdentityModule } from './modules/identity/identity.module';
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([
       {
-        ttl: 60,
+        ttl: 60_000,
         limit: 20,
-        blockDuration: (60 * 60) / 2,
+        blockDuration: 30 * 60_000,
       },
     ]),
     PrismaModule,
@@ -29,6 +30,7 @@ import { IdentityModule } from './modules/identity/identity.module';
     RedisModule,
     TokenCleanupModule,
     IdentityModule,
+    KeysModule,
   ],
   controllers: [AppController],
   providers: [

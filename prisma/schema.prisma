@@ -21,18 +21,59 @@ model User {
   refreshTokens    RefreshToken[]
   totpSecret       String?
   isTotpEnabled    Boolean          @default(false)
+  keyClaims        E2eKeyClaim[]
 }
 
 model DeviceIdentity {
-  id        String    @id @default(uuid())
+  id        String        @id @default(uuid())
   userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   publicKey String
-  createdAt DateTime  @default(now())
+  e2eBundle E2eBundle?
+  keyClaims E2eKeyClaim[]
+  createdAt DateTime      @default(now())
   revokedAt DateTime?
 
   @@unique([userId, publicKey])
   @@index([userId])
+}
+
+model E2eBundle {
+  deviceId              String             @id
+  device                DeviceIdentity     @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  registrationId        Int
+  identityKey           String             @db.VarChar(44)
+  signedPrekeyId        Int
+  signedPrekeyPublicKey String             @db.VarChar(44)
+  signedPrekeySignature String             @db.VarChar(88)
+  version               Int
+  publicationHash       String             @db.VarChar(64)
+  lastPrekeyId          Int                @default(-1)
+  updatedAt             DateTime           @updatedAt
+  prekeys               E2eOneTimePrekey[]
+}
+
+model E2eOneTimePrekey {
+  deviceId  String
+  keyId     Int
+  publicKey String    @db.VarChar(44)
+  bundle    E2eBundle @relation(fields: [deviceId], references: [deviceId], onDelete: Cascade)
+
+  @@id([deviceId, keyId])
+}
+
+model E2eKeyClaim {
+  requesterUserId String
+  requestId       String         @db.Uuid
+  targetDeviceId  String
+  requester       User           @relation(fields: [requesterUserId], references: [id], onDelete: Cascade)
+  target          DeviceIdentity @relation(fields: [targetDeviceId], references: [id], onDelete: Cascade)
+  response        Json
+  expiresAt       DateTime
+
+  @@id([requesterUserId, requestId])
+  @@index([expiresAt])
+  @@index([targetDeviceId])
 }
 
 model RefreshToken {
